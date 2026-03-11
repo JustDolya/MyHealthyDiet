@@ -4,15 +4,15 @@ import com.example.myhealthydiet.domain.models.*
 import com.example.myhealthydiet.domain.models.enums.*
 import com.example.myhealthydiet.domain.repository.AuthRepository
 import com.example.myhealthydiet.domain.repository.NutritionRepository
-import com.example.myhealthydiet.domain.repository.SyncRepository
 import com.example.myhealthydiet.domain.repository.UserRepository
+import com.example.myhealthydiet.domain.usecases.init.InitializeAppUseCase
 import javax.inject.Inject
 
 class RegisterUseCase @Inject constructor(
     private val authRepository: AuthRepository,
     private val userRepository: UserRepository,
     private val nutritionRepository: NutritionRepository,
-    private val syncRepository: SyncRepository,
+    private val initializeAppUseCase: InitializeAppUseCase, // ← добавили
     private val calculateNutritionUseCase: CalculateNutritionUseCase
 ) {
     suspend operator fun invoke(
@@ -34,7 +34,14 @@ class RegisterUseCase @Inject constructor(
 
             val firebaseUser = firebaseUserResult.getOrNull()!!
 
-            // 2. Рассчитываем КБЖУ
+            // 2. Инициализация стандартных данных (категории, продукты, блюда)
+            val initResult = initializeAppUseCase()
+            if (initResult.isFailure) {
+                // Если не удалось загрузить данные — всё равно продолжаем
+                // (можно будет загрузить позже через синхронизацию)
+            }
+
+            // 3. Рассчитываем КБЖУ
             val nutrition = calculateNutritionUseCase(
                 age = age,
                 sex = sex,
@@ -44,7 +51,7 @@ class RegisterUseCase @Inject constructor(
                 goal = goal
             )
 
-            // 3. Создаем пользователя
+            // 4. Создаем пользователя
             val user = User(
                 id = 1,
                 firebaseUid = firebaseUser.uid,
@@ -62,15 +69,9 @@ class RegisterUseCase @Inject constructor(
                 lastSyncTimestamp = System.currentTimeMillis()
             )
 
-            // 4. Сохраняем локально
+            // 5. Сохраняем локально
             userRepository.saveUser(user)
             nutritionRepository.resetDailyNutrition()
-
-            // 5. Загружаем стандартные данные (продукты, блюда)
-            syncRepository.loadCommonData()
-
-            // 6. Загружаем данные в Firebase
-            syncRepository.uploadAllData()
 
             Result.success(user)
         } catch (e: Exception) {
