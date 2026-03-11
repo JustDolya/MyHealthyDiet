@@ -35,7 +35,7 @@ class HistoryRepositoryImpl @Inject constructor(
         calendar.add(Calendar.DAY_OF_YEAR, 1)
         val todayEnd = calendar.timeInMillis
 
-        return historyDao.getTodayHistory(userId, todayStart, todayEnd)
+        return historyDao.getHistoryByDateRange(userId, todayStart, todayEnd)
             .map { list -> list.map { it.toDomain() } }
     }
 

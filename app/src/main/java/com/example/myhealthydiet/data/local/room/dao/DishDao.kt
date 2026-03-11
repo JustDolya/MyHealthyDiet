@@ -16,7 +16,7 @@ interface DishDao {
     @Query("SELECT * FROM dishes WHERE id = :dishId")
     suspend fun getDishById(dishId: Int): DishEntity?
 
-    @Query("SELECT * FROM dishes WHERE isCreated = 1 ORDER BY name ASC")
+    @Query("SELECT * FROM dishes WHERE isCustom = 1 ORDER BY name ASC")
     fun getUserCreatedDishes(): Flow<List<DishEntity>>
 
     @Query("SELECT * FROM dishes WHERE name LIKE '%' || :query || '%' ORDER BY name ASC")
