@@ -2,10 +2,15 @@ package com.example.myhealthydiet.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+// Brand
+val BrandOrange = Color(0xFFFFB01C)
+val BrandOrangeDark = Color(0xFFCC8A00)
+val BrandOrangeLight = Color(0xFFFFC84A)
+val BrandOrangeContainer = Color(0xFFFFE0A0)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+// Neutrals
+val White = Color(0xFFFFFFFF)
+val Black = Color(0xFF1A1A1A)
+val SurfaceGray = Color(0xFFF7F7F7)
+val TextSecondary = Color(0xFF757575)
+val OutlineColor = Color(0xFFE0E0E0)
