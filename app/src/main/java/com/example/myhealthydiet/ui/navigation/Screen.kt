@@ -8,18 +8,27 @@ sealed class Screen(val route: String) {
 
     // Main flow (bottom nav)
     data object Home : Screen("home")
-    data object Diary : Screen("diary")
     data object Catalog : Screen("catalog")
     data object History : Screen("history")
     data object Profile : Screen("profile")
 
-    // Nested screens
-    data object AddProduct : Screen("add_product")
-    data object AddDish : Screen("add_dish")
-    data object ProductDetail : Screen("product_detail/{productId}") {
-        fun createRoute(productId: Long) = "product_detail/$productId"
+    // Catalog nested
+    data object DishCategories : Screen("dish_categories")
+    data object DishList : Screen("dish_list/{categoryId}/{categoryName}") {
+        fun createRoute(categoryId: Int, categoryName: String) =
+            "dish_list/$categoryId/${categoryName.encode()}"
     }
     data object DishDetail : Screen("dish_detail/{dishId}") {
-        fun createRoute(dishId: Long) = "dish_detail/$dishId"
+        fun createRoute(dishId: Int) = "dish_detail/$dishId"
+    }
+    data object ProductCategories : Screen("product_categories")
+    data object ProductList : Screen("product_list/{categoryId}/{categoryName}") {
+        fun createRoute(categoryId: Int, categoryName: String) =
+            "product_list/$categoryId/${categoryName.encode()}"
+    }
+    data object ProductDetail : Screen("product_detail/{productId}") {
+        fun createRoute(productId: Int) = "product_detail/$productId"
     }
 }
+
+private fun String.encode() = java.net.URLEncoder.encode(this, "UTF-8")

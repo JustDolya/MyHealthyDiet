@@ -73,6 +73,9 @@ class RegisterUseCase @Inject constructor(
             userRepository.saveUser(user)
             nutritionRepository.resetDailyNutrition()
 
+            // 6. Сохраняем в Firestore
+            userRepository.saveUserToCloud(user)
+
             Result.success(user)
         } catch (e: Exception) {
             Result.failure(e)

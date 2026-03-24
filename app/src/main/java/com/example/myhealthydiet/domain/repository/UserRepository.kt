@@ -10,4 +10,5 @@ interface UserRepository {
     suspend fun updateUser(user: User)
     suspend fun deleteUser()
     suspend fun updateSyncTimestamp(timestamp: Long)
+    suspend fun saveUserToCloud(user: User): Result<Unit>
 }

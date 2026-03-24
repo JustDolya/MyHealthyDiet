@@ -28,12 +28,6 @@ val bottomNavItems = listOf(
         unselectedIcon = Icons.Outlined.Home
     ),
     BottomNavItem(
-        screen = Screen.Diary,
-        label = "Дневник",
-        selectedIcon = Icons.Filled.Book,
-        unselectedIcon = Icons.Outlined.Book
-    ),
-    BottomNavItem(
         screen = Screen.Catalog,
         label = "Каталог",
         selectedIcon = Icons.Filled.Search,

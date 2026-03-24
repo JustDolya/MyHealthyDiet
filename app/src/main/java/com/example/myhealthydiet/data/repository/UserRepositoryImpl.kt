@@ -9,8 +9,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
+import com.example.myhealthydiet.data.mappers.toFirebaseMap
+import com.example.myhealthydiet.data.remote.firebase.firestore.FirebaseFirestoreDataSource
+
 class UserRepositoryImpl @Inject constructor(
-    private val userDao: UserDao
+    private val userDao: UserDao,
+    private val firestoreDataSource: FirebaseFirestoreDataSource,
 ) : UserRepository {
 
     override fun getUser(): Flow<User?> {
@@ -35,5 +39,9 @@ class UserRepositoryImpl @Inject constructor(
 
     override suspend fun updateSyncTimestamp(timestamp: Long) {
         userDao.updateSyncTimestamp(timestamp)
+    }
+
+    override suspend fun saveUserToCloud(user: User): Result<Unit> {
+        return firestoreDataSource.saveUserProfile(user.firebaseUid, user.toFirebaseMap())
     }
 }

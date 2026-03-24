@@ -11,14 +11,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.myhealthydiet.ui.screens.auth.LoginScreen
 import com.example.myhealthydiet.ui.screens.auth.RegisterScreen
 import com.example.myhealthydiet.ui.screens.catalog.CatalogScreen
-import com.example.myhealthydiet.ui.screens.diary.DiaryScreen
+import com.example.myhealthydiet.ui.screens.catalog.DishCategoriesScreen
+import com.example.myhealthydiet.ui.screens.catalog.DishDetailScreen
+import com.example.myhealthydiet.ui.screens.catalog.DishListScreen
+import com.example.myhealthydiet.ui.screens.catalog.ProductCategoriesScreen
+import com.example.myhealthydiet.ui.screens.catalog.ProductDetailScreen
+import com.example.myhealthydiet.ui.screens.catalog.ProductListScreen
 import com.example.myhealthydiet.ui.screens.history.HistoryScreen
 import com.example.myhealthydiet.ui.screens.home.HomeScreen
 import com.example.myhealthydiet.ui.screens.profile.ProfileScreen
@@ -29,7 +36,6 @@ fun AppNavGraph(isLoggedIn: Boolean) {
     val startDestination = if (isLoggedIn) Screen.Home.route else Screen.Login.route
 
     val mainScreenRoutes = bottomNavItems.map { it.screen.route }.toSet()
-
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
     val isMainScreen = currentDestination?.route in mainScreenRoutes
@@ -41,7 +47,6 @@ fun AppNavGraph(isLoggedIn: Boolean) {
                     bottomNavItems.forEach { item ->
                         val isSelected = currentDestination?.hierarchy
                             ?.any { it.route == item.screen.route } == true
-
                         NavigationBarItem(
                             selected = isSelected,
                             onClick = {
@@ -56,10 +61,10 @@ fun AppNavGraph(isLoggedIn: Boolean) {
                             icon = {
                                 Icon(
                                     imageVector = if (isSelected) item.selectedIcon else item.unselectedIcon,
-                                    contentDescription = item.label
+                                    contentDescription = item.label,
                                 )
                             },
-                            label = { Text(item.label) }
+                            label = { Text(item.label) },
                         )
                     }
                 }
@@ -69,9 +74,9 @@ fun AppNavGraph(isLoggedIn: Boolean) {
         NavHost(
             navController = navController,
             startDestination = startDestination,
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier.padding(innerPadding),
         ) {
-            // Auth
+            // ── Auth ──────────────────────────────────────────────────────────
             composable(Screen.Login.route) {
                 LoginScreen(
                     onLoginSuccess = {
@@ -79,9 +84,7 @@ fun AppNavGraph(isLoggedIn: Boolean) {
                             popUpTo(Screen.Login.route) { inclusive = true }
                         }
                     },
-                    onNavigateToRegister = {
-                        navController.navigate(Screen.Register.route)
-                    }
+                    onNavigateToRegister = { navController.navigate(Screen.Register.route) },
                 )
             }
             composable(Screen.Register.route) {
@@ -91,21 +94,13 @@ fun AppNavGraph(isLoggedIn: Boolean) {
                             popUpTo(Screen.Login.route) { inclusive = true }
                         }
                     },
-                    onNavigateBack = {
-                        navController.popBackStack()
-                    }
+                    onNavigateBack = { navController.popBackStack() },
                 )
             }
 
-            // Main screens
+            // ── Main ──────────────────────────────────────────────────────────
             composable(Screen.Home.route) {
                 HomeScreen(navController = navController)
-            }
-            composable(Screen.Diary.route) {
-                DiaryScreen(navController = navController)
-            }
-            composable(Screen.Catalog.route) {
-                CatalogScreen(navController = navController)
             }
             composable(Screen.History.route) {
                 HistoryScreen(navController = navController)
@@ -117,8 +112,67 @@ fun AppNavGraph(isLoggedIn: Boolean) {
                         navController.navigate(Screen.Login.route) {
                             popUpTo(0) { inclusive = true }
                         }
-                    }
+                    },
                 )
+            }
+
+            // ── Catalog root ──────────────────────────────────────────────────
+            composable(Screen.Catalog.route) {
+                CatalogScreen(navController = navController)
+            }
+
+            // ── Dishes ────────────────────────────────────────────────────────
+            composable(Screen.DishCategories.route) {
+                DishCategoriesScreen(navController = navController)
+            }
+            composable(
+                route = Screen.DishList.route,
+                arguments = listOf(
+                    navArgument("categoryId") { type = NavType.IntType },
+                    navArgument("categoryName") { type = NavType.StringType },
+                ),
+            ) { backStack ->
+                val categoryId = backStack.arguments?.getInt("categoryId") ?: 0
+                val categoryName = backStack.arguments?.getString("categoryName") ?: ""
+                DishListScreen(
+                    navController = navController,
+                    categoryId = categoryId,
+                    categoryName = java.net.URLDecoder.decode(categoryName, "UTF-8"),
+                )
+            }
+            composable(
+                route = Screen.DishDetail.route,
+                arguments = listOf(navArgument("dishId") { type = NavType.IntType }),
+            ) { backStack ->
+                val dishId = backStack.arguments?.getInt("dishId") ?: 0
+                DishDetailScreen(navController = navController, dishId = dishId)
+            }
+
+            // ── Products ──────────────────────────────────────────────────────
+            composable(Screen.ProductCategories.route) {
+                ProductCategoriesScreen(navController = navController)
+            }
+            composable(
+                route = Screen.ProductList.route,
+                arguments = listOf(
+                    navArgument("categoryId") { type = NavType.IntType },
+                    navArgument("categoryName") { type = NavType.StringType },
+                ),
+            ) { backStack ->
+                val categoryId = backStack.arguments?.getInt("categoryId") ?: 0
+                val categoryName = backStack.arguments?.getString("categoryName") ?: ""
+                ProductListScreen(
+                    navController = navController,
+                    categoryId = categoryId,
+                    categoryName = java.net.URLDecoder.decode(categoryName, "UTF-8"),
+                )
+            }
+            composable(
+                route = Screen.ProductDetail.route,
+                arguments = listOf(navArgument("productId") { type = NavType.IntType }),
+            ) { backStack ->
+                val productId = backStack.arguments?.getInt("productId") ?: 0
+                ProductDetailScreen(navController = navController, productId = productId)
             }
         }
     }
