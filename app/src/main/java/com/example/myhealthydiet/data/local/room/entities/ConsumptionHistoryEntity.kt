@@ -15,7 +15,12 @@ import androidx.room.PrimaryKey
             onDelete = ForeignKey.CASCADE
         )
     ],
-    indices = [Index(value = ["userId"]), Index(value = ["datetime"])]
+    // Добавлен уникальный индекс — предотвращает дубликаты при загрузке из облака
+    indices = [
+        Index(value = ["userId"]),
+        Index(value = ["datetime"]),
+        Index(value = ["userId", "datetime", "foodId", "isDish"], unique = true)
+    ]
 )
 data class ConsumptionHistoryEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
@@ -29,5 +34,5 @@ data class ConsumptionHistoryEntity(
     val proteins: Int,
     val fats: Int,
     val carbs: Int,
-    val firebaseId: String? = null // ← добавили
+    val firebaseId: String? = null
 )

@@ -31,32 +31,32 @@ object InitialDataLoader {
             DishCategoryEntity(
                 1,
                 "Завтраки",
-                "android.resource://com.example.myhealthydiet/${R.drawable.kat1}"
+                "android.resource://com.example.myhealthydiet/${R.drawable.kat6}"
             ),
             DishCategoryEntity(
                 2,
                 "Первые блюда",
-                "android.resource://com.example.myhealthydiet/${R.drawable.kat2}"
+                "android.resource://com.example.myhealthydiet/${R.drawable.kat4}"
             ),
             DishCategoryEntity(
                 3,
                 "Вторые блюда",
-                "android.resource://com.example.myhealthydiet/${R.drawable.kat3}"
+                "android.resource://com.example.myhealthydiet/${R.drawable.kat2}"
             ),
             DishCategoryEntity(
                 4,
                 "Салаты",
-                "android.resource://com.example.myhealthydiet/${R.drawable.kat4}"
+                "android.resource://com.example.myhealthydiet/${R.drawable.kat3}"
             ),
             DishCategoryEntity(
                 5,
                 "Десерты",
-                "android.resource://com.example.myhealthydiet/${R.drawable.kat5}"
+                "android.resource://com.example.myhealthydiet/${R.drawable.kat1}"
             ),
             DishCategoryEntity(
                 6,
                 "Напитки",
-                "android.resource://com.example.myhealthydiet/${R.drawable.kat6}"
+                "android.resource://com.example.myhealthydiet/${R.drawable.kat5}"
             )
         )
     }

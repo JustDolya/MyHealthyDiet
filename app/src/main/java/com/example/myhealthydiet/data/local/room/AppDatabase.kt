@@ -17,7 +17,7 @@ import com.example.myhealthydiet.data.local.room.entities.*
         DishEntity::class,
         ConsumptionHistoryEntity::class
     ],
-    version = 1,
+    version = 2, // ← bumped: добавлен уникальный индекс в ConsumptionHistoryEntity
     exportSchema = false
 )
 @TypeConverters(DatabaseConverters::class)

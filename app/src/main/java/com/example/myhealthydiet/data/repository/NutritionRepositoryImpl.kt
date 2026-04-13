@@ -1,5 +1,6 @@
 package com.example.myhealthydiet.data.repository
 
+import com.example.myhealthydiet.data.local.room.dao.ConsumptionHistoryDao
 import com.example.myhealthydiet.data.local.room.dao.DailyNutritionDao
 import com.example.myhealthydiet.data.local.room.dao.UserDao
 import com.example.myhealthydiet.data.mappers.toDomain
@@ -15,59 +16,74 @@ import javax.inject.Inject
 
 class NutritionRepositoryImpl @Inject constructor(
     private val dailyNutritionDao: DailyNutritionDao,
-    private val userDao: UserDao
+    private val userDao: UserDao,
+    private val historyDao: ConsumptionHistoryDao,
 ) : NutritionRepository {
 
     private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
     override fun getDailyNutrition(): Flow<DailyNutrition?> {
         val today = getCurrentDate()
-        val userId = 1 // всегда 1 в локальной БД
-        return dailyNutritionDao.getDailyNutrition(userId, today).map { it?.toDomain() }
+        return dailyNutritionDao.getDailyNutrition(1, today).map { it?.toDomain() }
     }
 
     override suspend fun getDailyNutritionOnce(): DailyNutrition? {
-        val today = getCurrentDate()
-        val userId = 1
-        return dailyNutritionDao.getDailyNutrition(userId, today).first()?.toDomain()
+        return dailyNutritionDao.getDailyNutrition(1, getCurrentDate()).first()?.toDomain()
     }
 
     override suspend fun resetDailyNutrition() {
         val user = userDao.getUserOnce() ?: return
         val today = getCurrentDate()
-
-        val newNutrition = DailyNutrition(
+        val nutrition = DailyNutrition(
             userId = user.id,
             date = today,
             calories = user.calories,
             proteins = user.proteins,
             fats = user.fats,
-            carbs = user.carbs
+            carbs = user.carbs,
         )
-
-        dailyNutritionDao.insertDailyNutrition(newNutrition.toEntity())
+        dailyNutritionDao.insertDailyNutrition(nutrition.toEntity())
     }
 
     override suspend fun subtractNutrition(calories: Int, proteins: Int, fats: Int, carbs: Int) {
-        val today = getCurrentDate()
-        val userId = 1
-        dailyNutritionDao.subtractNutrition(userId, today, calories, proteins, fats, carbs)
+        dailyNutritionDao.subtractNutrition(1, getCurrentDate(), calories, proteins, fats, carbs)
     }
 
     override suspend fun checkAndResetIfNewDay() {
         val user = userDao.getUserOnce() ?: return
         val today = getCurrentDate()
-        val userId = user.id
+        val existing = dailyNutritionDao.getDailyNutrition(1, today).first()
 
-        val nutrition = dailyNutritionDao.getDailyNutrition(userId, today).first()
+        if (existing == null) {
+            // Новый день — считаем сколько уже съедено СЕГОДНЯ (на случай перезахода в тот же день)
+            val cal = Calendar.getInstance()
+            cal.set(Calendar.HOUR_OF_DAY, 0)
+            cal.set(Calendar.MINUTE, 0)
+            cal.set(Calendar.SECOND, 0)
+            cal.set(Calendar.MILLISECOND, 0)
+            val todayStart = cal.timeInMillis
+            cal.add(Calendar.DAY_OF_YEAR, 1)
+            val todayEnd = cal.timeInMillis
 
-        if (nutrition == null) {
-            // Новый день - создаем запись
-            resetDailyNutrition()
+            val totals = historyDao.getDailyTotals(1, todayStart, todayEnd)
+
+            // Остаток = норма − уже съеденное
+            val remainCalories = (user.calories - (totals?.totalCalories ?: 0)).coerceAtLeast(0)
+            val remainProteins = (user.proteins - (totals?.totalProteins ?: 0)).coerceAtLeast(0)
+            val remainFats     = (user.fats     - (totals?.totalFats     ?: 0)).coerceAtLeast(0)
+            val remainCarbs    = (user.carbs    - (totals?.totalCarbs    ?: 0)).coerceAtLeast(0)
+
+            val nutrition = DailyNutrition(
+                userId = 1,
+                date = today,
+                calories = remainCalories,
+                proteins = remainProteins,
+                fats = remainFats,
+                carbs = remainCarbs,
+            )
+            dailyNutritionDao.insertDailyNutrition(nutrition.toEntity())
         }
     }
 
-    private fun getCurrentDate(): String {
-        return dateFormat.format(Date())
-    }
+    private fun getCurrentDate(): String = dateFormat.format(Date())
 }

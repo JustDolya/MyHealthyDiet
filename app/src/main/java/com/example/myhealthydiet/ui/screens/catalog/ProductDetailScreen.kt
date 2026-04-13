@@ -43,9 +43,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.example.myhealthydiet.domain.models.Product
 import com.example.myhealthydiet.ui.components.BrandButton
 import com.example.myhealthydiet.ui.components.BrandTextField
+import com.example.myhealthydiet.ui.navigation.Screen
 import com.example.myhealthydiet.ui.theme.BrandOrange
 import com.example.myhealthydiet.ui.theme.Black
 import com.example.myhealthydiet.ui.theme.SurfaceGray
@@ -59,16 +59,19 @@ fun ProductDetailScreen(
     viewModel: CatalogViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    // Фикс #3: загружаем по id напрямую
     LaunchedEffect(productId) { viewModel.loadProductById(productId) }
     val product = uiState.selectedProduct
     val snackbarHostState = remember { SnackbarHostState() }
     var gramsInput by remember { mutableStateOf("100") }
 
+    // После успешного добавления — переходим на Home
     LaunchedEffect(uiState.addSuccess) {
         if (uiState.addSuccess) {
-            snackbarHostState.showSnackbar("Добавлено в рацион!")
             viewModel.clearAddSuccess()
+            navController.navigate(Screen.Home.route) {
+                popUpTo(Screen.Home.route) { inclusive = false }
+                launchSingleTop = true
+            }
         }
     }
     LaunchedEffect(uiState.error) {
@@ -97,7 +100,10 @@ fun ProductDetailScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { innerPadding ->
         if (product == null) {
-            Box(Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
+            Box(
+                Modifier.fillMaxSize().padding(innerPadding),
+                contentAlignment = Alignment.Center,
+            ) {
                 CircularProgressIndicator(color = BrandOrange)
             }
             return@Scaffold
@@ -110,7 +116,6 @@ fun ProductDetailScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
         ) {
-            // ── Название ──────────────────────────────────────────────────────
             Text(product.name, fontSize = 26.sp, fontWeight = FontWeight.Bold, color = Black)
             if (product.isCustom) {
                 Text("Пользовательский продукт", fontSize = 13.sp, color = BrandOrange)
@@ -118,7 +123,6 @@ fun ProductDetailScreen(
 
             Spacer(Modifier.height(20.dp))
 
-            // ── КБЖУ на 100 г ─────────────────────────────────────────────────
             Text("КБЖУ на 100 г:", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = Black)
             Spacer(Modifier.height(8.dp))
             Row(
@@ -133,7 +137,6 @@ fun ProductDetailScreen(
 
             Spacer(Modifier.height(28.dp))
 
-            // ── Добавить в рацион ─────────────────────────────────────────────
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -157,7 +160,6 @@ fun ProductDetailScreen(
                     )
                     Spacer(Modifier.height(8.dp))
 
-                    // Предпросмотр КБЖУ
                     val grams = gramsInput.toIntOrNull()?.coerceIn(1, 9999) ?: 100
                     val multiplier = grams / 100.0
                     Text(
@@ -172,8 +174,14 @@ fun ProductDetailScreen(
                     Spacer(Modifier.height(12.dp))
 
                     if (uiState.isLoading) {
-                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-                            CircularProgressIndicator(color = BrandOrange, modifier = Modifier.size(40.dp))
+                        Row(
+                            Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center,
+                        ) {
+                            CircularProgressIndicator(
+                                color = BrandOrange,
+                                modifier = Modifier.size(40.dp),
+                            )
                         }
                     } else {
                         BrandButton(

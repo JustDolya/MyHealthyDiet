@@ -13,6 +13,9 @@ interface DishCategoryDao {
     @Query("SELECT * FROM dish_categories WHERE id = :categoryId")
     suspend fun getCategoryById(categoryId: Int): DishCategoryEntity?
 
+    @Query("SELECT COUNT(*) FROM dish_categories")
+    suspend fun getCount(): Int
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCategory(category: DishCategoryEntity): Long
 

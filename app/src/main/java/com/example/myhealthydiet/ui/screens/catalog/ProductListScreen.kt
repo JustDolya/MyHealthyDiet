@@ -10,13 +10,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -52,11 +55,7 @@ fun ProductListScreen(
     categoryName: String,
     viewModel: CatalogViewModel = hiltViewModel(),
 ) {
-
-    // Фикс #2: явно выставляем категорию при входе на экран
-    LaunchedEffect(categoryId) {
-        viewModel.setProductCategory(categoryId)
-    }
+    LaunchedEffect(categoryId) { viewModel.setProductCategory(categoryId) }
 
     val products by viewModel.productsByCategory.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
@@ -76,22 +75,29 @@ fun ProductListScreen(
                     navigationIconContentColor = Black,
                 ),
             )
-        }
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { navController.navigate(Screen.AddProduct.createRoute(categoryId)) },
+                shape = CircleShape,
+                containerColor = BrandOrange,
+                contentColor = Black,
+            ) {
+                Icon(Icons.Filled.Add, contentDescription = "Добавить продукт")
+            }
+        },
     ) { innerPadding ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
+            modifier = Modifier.fillMaxSize().padding(innerPadding),
         ) {
-            // Поиск
             OutlinedTextField(
                 value = uiState.productSearchQuery,
                 onValueChange = viewModel::onSearchQueryChange,
                 placeholder = { Text("Поиск продукта...", color = TextSecondary) },
-                leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null, tint = BrandOrange) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                leadingIcon = {
+                    Icon(Icons.Filled.Search, contentDescription = null, tint = BrandOrange)
+                },
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -104,14 +110,13 @@ fun ProductListScreen(
 
             if (products.isEmpty()) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    if (uiState.productSearchQuery.isEmpty()) {
+                    if (uiState.productSearchQuery.isEmpty())
                         CircularProgressIndicator(color = BrandOrange)
-                    } else {
+                    else
                         Text("Ничего не найдено", color = TextSecondary)
-                    }
                 }
             } else {
-                LazyColumn(contentPadding = PaddingValues(bottom = 16.dp)) {
+                LazyColumn(contentPadding = PaddingValues(bottom = 80.dp)) {
                     items(products) { product ->
                         ProductListItem(
                             product = product,
@@ -139,7 +144,7 @@ private fun ProductListItem(product: Product, onClick: () -> Unit) {
         Column(modifier = Modifier.weight(1f)) {
             Text(product.name, fontWeight = FontWeight.Medium, fontSize = 15.sp, color = Black)
             Text(
-                text = "на 100 г: ${product.calories} ккал  Б:${product.proteins}  Ж:${product.fats}  У:${product.carbs}",
+                text = "${product.calories} ккал · Б ${product.proteins} г · Ж ${product.fats} г · У ${product.carbs} г",
                 fontSize = 12.sp,
                 color = TextSecondary,
             )

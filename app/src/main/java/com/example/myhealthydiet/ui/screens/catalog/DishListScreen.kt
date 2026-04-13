@@ -12,11 +12,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -30,21 +33,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.myhealthydiet.domain.models.Dish
 import com.example.myhealthydiet.ui.navigation.Screen
 import com.example.myhealthydiet.ui.theme.BrandOrange
 import com.example.myhealthydiet.ui.theme.Black
 import com.example.myhealthydiet.ui.theme.White
-
-private val dishEmojis = listOf("🍳","🥣","🍲","🥘","🍝","🥗","🍱","🥩","🍗","🥚","🫕","🍜","🥙","🧆","🍛","🥧","🍮","🧁")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,10 +56,7 @@ fun DishListScreen(
     categoryName: String,
     viewModel: CatalogViewModel = hiltViewModel(),
 ) {
-    // Фикс #2: явно выставляем категорию при входе на экран
-    LaunchedEffect(categoryId) {
-        viewModel.setDishCategory(categoryId)
-    }
+    LaunchedEffect(categoryId) { viewModel.setDishCategory(categoryId) }
 
     val dishes by viewModel.dishesByCategory.collectAsState()
 
@@ -76,7 +75,17 @@ fun DishListScreen(
                     navigationIconContentColor = Black,
                 ),
             )
-        }
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { navController.navigate(Screen.AddDish.createRoute(categoryId)) },
+                shape = CircleShape,
+                containerColor = BrandOrange,
+                contentColor = Black,
+            ) {
+                Icon(Icons.Filled.Add, contentDescription = "Добавить блюдо")
+            }
+        },
     ) { innerPadding ->
         if (dishes.isEmpty()) {
             Box(
@@ -98,10 +107,7 @@ fun DishListScreen(
             items(dishes) { dish ->
                 DishCard(
                     dish = dish,
-                    emoji = dishEmojis.getOrElse(dish.id % dishEmojis.size) { "🍽" },
-                    onClick = {
-                        navController.navigate(Screen.DishDetail.createRoute(dish.id))
-                    },
+                    onClick = { navController.navigate(Screen.DishDetail.createRoute(dish.id)) },
                 )
             }
         }
@@ -109,7 +115,7 @@ fun DishListScreen(
 }
 
 @Composable
-private fun DishCard(dish: Dish, emoji: String, onClick: () -> Unit) {
+private fun DishCard(dish: Dish, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -117,25 +123,17 @@ private fun DishCard(dish: Dish, emoji: String, onClick: () -> Unit) {
             .clip(RoundedCornerShape(12.dp))
             .clickable(onClick = onClick),
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(BrandOrange.copy(alpha = 0.5f), BrandOrange.copy(alpha = 0.9f))
-                    )
-                )
-        )
-        Text(
-            text = emoji,
-            fontSize = 52.sp,
-            modifier = Modifier.align(Alignment.Center).padding(bottom = 24.dp),
+        AsyncImage(
+            model = dish.imageUri,
+            contentDescription = dish.name,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize(),
         )
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter)
-                .background(Color.Black.copy(alpha = 0.45f)),
+                .background(Color.Black.copy(alpha = 0.5f)),
         ) {
             Text(
                 text = dish.name,

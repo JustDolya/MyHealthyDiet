@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-// Extension для DataStore
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "app_preferences")
 
 class InitRepositoryImpl @Inject constructor(
@@ -25,7 +24,7 @@ class InitRepositoryImpl @Inject constructor(
     private val productCategoryDao: ProductCategoryDao,
     private val dishCategoryDao: DishCategoryDao,
     private val productDao: ProductDao,
-    private val dishDao: DishDao
+    private val dishDao: DishDao,
 ) : InitRepository {
 
     companion object {
@@ -33,19 +32,28 @@ class InitRepositoryImpl @Inject constructor(
     }
 
     override suspend fun isDataInitialized(): Boolean {
-        return context.dataStore.data.map { preferences ->
-            preferences[DATA_INITIALIZED] ?: false
-        }.first()
+        // Проверяем и флаг И реальное наличие данных в БД.
+        // Флаг мог остаться true после переустановки, пока БД уже пуста —
+        // поэтому одного флага недостаточно.
+        val flagSet = context.dataStore.data
+            .map { it[DATA_INITIALIZED] ?: false }
+            .first()
+
+        if (!flagSet) return false
+
+        // Дополнительно проверяем что категории реально есть в БД
+        val dishCatCount = dishCategoryDao.getCount()
+        val productCatCount = productCategoryDao.getCount()
+
+        return dishCatCount > 0 && productCatCount > 0
     }
 
     override suspend fun initializeCategories() {
-        // Загружаем категории продуктов (15 штук)
         val productCategories = InitialDataLoader.getProductCategories()
         for (category in productCategories) {
             productCategoryDao.insertCategory(category)
         }
 
-        // Загружаем категории блюд (6 штук)
         val dishCategories = InitialDataLoader.getDishCategories()
         for (category in dishCategories) {
             dishCategoryDao.insertCategory(category)
@@ -63,8 +71,6 @@ class InitRepositoryImpl @Inject constructor(
     }
 
     override suspend fun markDataAsInitialized() {
-        context.dataStore.edit { preferences ->
-            preferences[DATA_INITIALIZED] = true
-        }
+        context.dataStore.edit { it[DATA_INITIALIZED] = true }
     }
 }

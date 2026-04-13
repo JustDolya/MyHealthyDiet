@@ -39,8 +39,6 @@ import com.example.myhealthydiet.ui.theme.BrandOrange
 import com.example.myhealthydiet.ui.theme.Black
 import com.example.myhealthydiet.ui.theme.White
 
-private val productCategoryEmojis = listOf("🥛","🥦","🍗","🐟","🍞","🧀","🥚","🫘","🍎","🥜")
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductCategoriesScreen(
@@ -52,7 +50,9 @@ fun ProductCategoriesScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Категории продуктов", fontWeight = FontWeight.Bold, fontSize = 20.sp) },
+                title = {
+                    Text("Категории продуктов", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
@@ -83,10 +83,10 @@ fun ProductCategoriesScreen(
             items(categories) { category ->
                 ProductCategoryCard(
                     category = category,
-                    emoji = productCategoryEmojis.getOrElse(category.id % productCategoryEmojis.size) { "🛒" },
                     onClick = {
-                        viewModel.setProductCategory(category.id)
-                        navController.navigate(Screen.ProductList.createRoute(category.id, category.name))
+                        navController.navigate(
+                            Screen.ProductList.createRoute(category.id, category.name)
+                        )
                     },
                 )
             }
@@ -95,13 +95,13 @@ fun ProductCategoriesScreen(
 }
 
 @Composable
-private fun ProductCategoryCard(category: ProductCategory, emoji: String, onClick: () -> Unit) {
+private fun ProductCategoryCard(category: ProductCategory, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(110.dp)
-            .padding(vertical = 6.dp)
-            .clip(RoundedCornerShape(14.dp))
+            .height(72.dp)
+            .padding(vertical = 5.dp)
+            .clip(RoundedCornerShape(12.dp))
             .clickable(onClick = onClick),
     ) {
         Box(
@@ -110,23 +110,20 @@ private fun ProductCategoryCard(category: ProductCategory, emoji: String, onClic
                 .background(
                     Brush.horizontalGradient(
                         colors = listOf(
-                            BrandOrange.copy(alpha = 0.85f),
-                            BrandOrange.copy(alpha = 0.4f),
+                            BrandOrange.copy(alpha = 0.9f),
+                            BrandOrange.copy(alpha = 0.5f),
                         )
                     )
                 )
         )
         Text(
-            text = emoji,
-            fontSize = 64.sp,
-            modifier = Modifier.align(Alignment.CenterEnd).padding(end = 16.dp),
-        )
-        Text(
             text = category.name,
-            fontSize = 22.sp,
+            fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             color = White,
-            modifier = Modifier.align(Alignment.CenterStart).padding(start = 20.dp),
+            modifier = Modifier
+                .align(Alignment.CenterStart)
+                .padding(start = 20.dp),
         )
     }
 }

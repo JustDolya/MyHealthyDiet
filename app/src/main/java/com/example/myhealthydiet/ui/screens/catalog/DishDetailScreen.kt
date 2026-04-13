@@ -37,24 +37,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.example.myhealthydiet.domain.models.Dish
+import coil.compose.AsyncImage
 import com.example.myhealthydiet.ui.components.BrandButton
 import com.example.myhealthydiet.ui.components.BrandTextField
+import com.example.myhealthydiet.ui.navigation.Screen
 import com.example.myhealthydiet.ui.theme.BrandOrange
 import com.example.myhealthydiet.ui.theme.Black
 import com.example.myhealthydiet.ui.theme.SurfaceGray
 import com.example.myhealthydiet.ui.theme.TextSecondary
-import com.example.myhealthydiet.ui.theme.White
-
-private val dishDetailEmojis = listOf("🍳","🥣","🍲","🥘","🍝","🥗","🍱","🥩","🍗","🥚","🫕","🍜","🥙","🧆","🍛","🥧","🍮","🧁")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,16 +61,19 @@ fun DishDetailScreen(
     viewModel: CatalogViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    // Фикс #3: загружаем по id напрямую
     LaunchedEffect(dishId) { viewModel.loadDishById(dishId) }
     val dish = uiState.selectedDish
     val snackbarHostState = remember { SnackbarHostState() }
     var portionInput by remember { mutableStateOf("100") }
 
+    // После успешного добавления — переходим на Home
     LaunchedEffect(uiState.addSuccess) {
         if (uiState.addSuccess) {
-            snackbarHostState.showSnackbar("Добавлено в рацион!")
             viewModel.clearAddSuccess()
+            navController.navigate(Screen.Home.route) {
+                popUpTo(Screen.Home.route) { inclusive = false }
+                launchSingleTop = true
+            }
         }
     }
     LaunchedEffect(uiState.error) {
@@ -102,7 +102,10 @@ fun DishDetailScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { innerPadding ->
         if (dish == null) {
-            Box(Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
+            Box(
+                Modifier.fillMaxSize().padding(innerPadding),
+                contentAlignment = Alignment.Center,
+            ) {
                 CircularProgressIndicator(color = BrandOrange)
             }
             return@Scaffold
@@ -114,30 +117,18 @@ fun DishDetailScreen(
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState()),
         ) {
-            // ── Шапка с эмодзи вместо фото ───────────────────────────────────
-            Box(
+            // Реальная картинка блюда
+            AsyncImage(
+                model = dish.imageUri,
+                contentDescription = dish.name,
+                contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp)
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(
-                                BrandOrange.copy(alpha = 0.4f),
-                                BrandOrange.copy(alpha = 0.85f),
-                            )
-                        )
-                    ),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = dishDetailEmojis.getOrElse(dish.id % dishDetailEmojis.size) { "🍽" },
-                    fontSize = 80.sp,
-                )
-            }
+                    .height(220.dp),
+            )
 
             Column(modifier = Modifier.padding(16.dp)) {
 
-                // ── Название ──────────────────────────────────────────────────
                 Text(dish.name, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Black)
                 Spacer(Modifier.height(4.dp))
                 Text(
@@ -148,8 +139,12 @@ fun DishDetailScreen(
 
                 Spacer(Modifier.height(16.dp))
 
-                // ── КБЖУ ─────────────────────────────────────────────────────
-                Text("КБЖУ (на 100 грамм порции):", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = Black)
+                Text(
+                    "КБЖУ (на 100 грамм порции):",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Black,
+                )
                 Spacer(Modifier.height(8.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -163,20 +158,32 @@ fun DishDetailScreen(
 
                 Spacer(Modifier.height(16.dp))
 
-                // ── Ингредиенты ───────────────────────────────────────────────
-                Text("Ингредиенты:", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = Black)
+                Text(
+                    "Ингредиенты:",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Black,
+                )
                 Spacer(Modifier.height(8.dp))
                 dish.ingredients.forEach { ingredient ->
                     Row(modifier = Modifier.padding(vertical = 2.dp)) {
                         Text("• ", color = BrandOrange, fontWeight = FontWeight.Bold)
-                        Text("${ingredient.name} — ${ingredient.amount}", fontSize = 14.sp, color = Black)
+                        Text(
+                            "${ingredient.name} — ${ingredient.amount}",
+                            fontSize = 14.sp,
+                            color = Black,
+                        )
                     }
                 }
 
                 Spacer(Modifier.height(16.dp))
 
-                // ── Шаги приготовления ────────────────────────────────────────
-                Text("Шаги приготовления:", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = Black)
+                Text(
+                    "Шаги приготовления:",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Black,
+                )
                 Spacer(Modifier.height(8.dp))
                 dish.steps.split("\n").forEachIndexed { index, step ->
                     if (step.isNotBlank()) {
@@ -191,7 +198,7 @@ fun DishDetailScreen(
 
                 Spacer(Modifier.height(24.dp))
 
-                // ── Добавить в рацион ─────────────────────────────────────────
+                // Блок добавления в рацион
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -208,7 +215,7 @@ fun DishDetailScreen(
                         )
                         Spacer(Modifier.height(8.dp))
                         Text(
-                            "Укажите размер порции (100 = целое блюдо)",
+                            "Укажите размер порции в граммах",
                             fontSize = 13.sp,
                             color = TextSecondary,
                         )
@@ -216,12 +223,11 @@ fun DishDetailScreen(
                         BrandTextField(
                             value = portionInput,
                             onValueChange = { portionInput = it.filter { c -> c.isDigit() } },
-                            label = "Размер порции, г",
+                            label = "Размер порции, грамм",
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         )
                         Spacer(Modifier.height(8.dp))
 
-                        // Предпросмотр КБЖУ для выбранной порции
                         val portion = portionInput.toIntOrNull()?.coerceIn(1, 999) ?: 100
                         val multiplier = portion / 100.0
                         Text(
@@ -236,8 +242,14 @@ fun DishDetailScreen(
                         Spacer(Modifier.height(12.dp))
 
                         if (uiState.isLoading) {
-                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-                                CircularProgressIndicator(color = BrandOrange, modifier = Modifier.size(40.dp))
+                            Row(
+                                Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center,
+                            ) {
+                                CircularProgressIndicator(
+                                    color = BrandOrange,
+                                    modifier = Modifier.size(40.dp),
+                                )
                             }
                         } else {
                             BrandButton(
@@ -258,7 +270,7 @@ fun DishDetailScreen(
 }
 
 @Composable
-public fun NutrientChip(label: String, value: String, modifier: Modifier = Modifier) {
+fun NutrientChip(label: String, value: String, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .background(BrandOrange.copy(alpha = 0.12f), RoundedCornerShape(8.dp))

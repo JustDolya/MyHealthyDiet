@@ -10,19 +10,19 @@ import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 class SyncRepositoryImpl @Inject constructor(
-        private val authRepository: AuthRepository,
-        private val firestoreDataSource: FirebaseFirestoreDataSource,
-        private val userDao: UserDao,
-        private val dailyNutritionDao: DailyNutritionDao,
-        private val productDao: ProductDao,
-        private val dishDao: DishDao,
-        private val historyDao: ConsumptionHistoryDao
+    private val authRepository: AuthRepository,
+    private val firestoreDataSource: FirebaseFirestoreDataSource,
+    private val userDao: UserDao,
+    private val dailyNutritionDao: DailyNutritionDao,
+    private val productDao: ProductDao,
+    private val dishDao: DishDao,
+    private val historyDao: ConsumptionHistoryDao
 ) : SyncRepository {
 
     override suspend fun syncAllData(): Result<Unit> {
         return try {
             val currentUser = authRepository.getCurrentUser()
-                    ?: return Result.failure(Exception("User not logged in"))
+                ?: return Result.failure(Exception("User not logged in"))
 
             val userId = currentUser.uid
 
@@ -53,7 +53,7 @@ class SyncRepositoryImpl @Inject constructor(
     override suspend fun checkAndSyncIfNeeded(): Result<Unit> {
         return try {
             val currentUser = authRepository.getCurrentUser()
-                    ?: return Result.failure(Exception("User not logged in"))
+                ?: return Result.failure(Exception("User not logged in"))
 
             val userId = currentUser.uid
             val localUser = userDao.getUserOnce() ?: return Result.success(Unit)
@@ -83,7 +83,7 @@ class SyncRepositoryImpl @Inject constructor(
     override suspend fun uploadAllData(): Result<Unit> {
         return try {
             val currentUser = authRepository.getCurrentUser()
-                    ?: return Result.failure(Exception("User not logged in"))
+                ?: return Result.failure(Exception("User not logged in"))
 
             val userId = currentUser.uid
 
@@ -106,7 +106,7 @@ class SyncRepositoryImpl @Inject constructor(
     override suspend fun downloadAllData(): Result<Unit> {
         return try {
             val currentUser = authRepository.getCurrentUser()
-                    ?: return Result.failure(Exception("User not logged in"))
+                ?: return Result.failure(Exception("User not logged in"))
 
             downloadAllData(currentUser.uid)
             Result.success(Unit)
@@ -121,7 +121,7 @@ class SyncRepositoryImpl @Inject constructor(
             val productsResult = firestoreDataSource.getCommonProducts()
             if (productsResult.isSuccess) {
                 val products = productsResult.getOrNull()?.mapIndexed { index, map ->
-                        map.toProduct(index).toEntity()
+                    map.toProduct(index).toEntity()
                 } ?: emptyList()
 
                 productDao.insertProducts(products)
@@ -131,7 +131,7 @@ class SyncRepositoryImpl @Inject constructor(
             val dishesResult = firestoreDataSource.getCommonDishes()
             if (dishesResult.isSuccess) {
                 val dishes = dishesResult.getOrNull()?.mapIndexed { index, map ->
-                        map.toDish(index).toEntity()
+                    map.toDish(index).toEntity()
                 } ?: emptyList()
 
                 dishDao.insertDishes(dishes)
@@ -148,32 +148,32 @@ class SyncRepositoryImpl @Inject constructor(
     private suspend fun syncUserProfile(userId: String) {
         val localUser = userDao.getUserOnce() ?: return
 
-                // Отправляем профиль в Firebase
-                firestoreDataSource.saveUserProfile(
-                        userId = userId,
-                        data = localUser.toDomain().toFirebaseMap()
-                )
+        // Отправляем профиль в Firebase
+        firestoreDataSource.saveUserProfile(
+            userId = userId,
+            data = localUser.toDomain().toFirebaseMap()
+        )
     }
 
     private suspend fun syncDailyNutrition(userId: String) {
         val localNutrition = dailyNutritionDao.getDailyNutrition(1, getCurrentDate()).first()
-                ?: return
+            ?: return
 
-                firestoreDataSource.saveDailyNutrition(
-                        userId = userId,
-                        data = localNutrition.toDomain().toFirebaseMap()
-                )
+        firestoreDataSource.saveDailyNutrition(
+            userId = userId,
+            data = localNutrition.toDomain().toFirebaseMap()
+        )
     }
 
     private suspend fun syncCustomProducts(userId: String) {
         val customProducts = productDao.getAllProducts().first()
-                .filter { it.isCustom }
+            .filter { it.isCustom }
 
         for (product in customProducts) {
             firestoreDataSource.saveCustomProduct(
-                    userId = userId,
-                    productId = product.id.toString(),
-                    data = product.toDomain().toFirebaseMap()
+                userId = userId,
+                productId = product.id.toString(),
+                data = product.toDomain().toFirebaseMap()
             )
         }
     }
@@ -183,9 +183,9 @@ class SyncRepositoryImpl @Inject constructor(
 
         for (dish in customDishes) {
             firestoreDataSource.saveCustomDish(
-                    userId = userId,
-                    dishId = dish.id.toString(),
-                    data = dish.toDomain().toFirebaseMap()
+                userId = userId,
+                dishId = dish.id.toString(),
+                data = dish.toDomain().toFirebaseMap()
             )
         }
     }
@@ -195,9 +195,9 @@ class SyncRepositoryImpl @Inject constructor(
 
         for (item in history) {
             firestoreDataSource.saveConsumptionHistory(
-                    userId = userId,
-                    historyId = item.id.toString(),
-                    data = item.toDomain().toFirebaseMap()
+                userId = userId,
+                historyId = item.id.toString(),
+                data = item.toDomain().toFirebaseMap()
             )
         }
     }
@@ -237,7 +237,7 @@ class SyncRepositoryImpl @Inject constructor(
         val productsResult = firestoreDataSource.getCustomProducts(userId)
         if (productsResult.isSuccess) {
             val products = productsResult.getOrNull()?.mapIndexed { index, map ->
-                    map.toProduct(index).toEntity()
+                map.toProduct(index).toEntity()
             } ?: emptyList()
 
             productDao.insertProducts(products)
@@ -247,7 +247,7 @@ class SyncRepositoryImpl @Inject constructor(
         val dishesResult = firestoreDataSource.getCustomDishes(userId)
         if (dishesResult.isSuccess) {
             val dishes = dishesResult.getOrNull()?.mapIndexed { index, map ->
-                    map.toDish(index).toEntity()
+                map.toDish(index).toEntity()
             } ?: emptyList()
 
             dishDao.insertDishes(dishes)
@@ -257,11 +257,11 @@ class SyncRepositoryImpl @Inject constructor(
         val historyResult = firestoreDataSource.getConsumptionHistory(userId)
         if (historyResult.isSuccess) {
             val history = historyResult.getOrNull()?.mapIndexed { index, map ->
-                    map.toConsumptionHistory(index, 1).toEntity()
+                map.toConsumptionHistory(index, 1).toEntity()
             } ?: emptyList()
 
             for (item in history) {
-                historyDao.insertHistory(item)
+                historyDao.insertHistoryIgnore(item)
             }
         }
 

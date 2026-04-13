@@ -18,6 +18,9 @@ interface ProductCategoryDao {
     @Query("SELECT * FROM product_categories WHERE id = :categoryId")
     suspend fun getCategoryById(categoryId: Int): ProductCategoryEntity?
 
+    @Query("SELECT COUNT(*) FROM product_categories")
+    suspend fun getCount(): Int
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCategory(category: ProductCategoryEntity): Long
 
