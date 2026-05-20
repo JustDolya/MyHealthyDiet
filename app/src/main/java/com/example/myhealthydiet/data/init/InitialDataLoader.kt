@@ -8,21 +8,21 @@ object InitialDataLoader {
 
     fun getProductCategories(): List<ProductCategoryEntity> {
         return listOf(
-            ProductCategoryEntity(1, "Молочные продукты", "ic_dairy"),
-            ProductCategoryEntity(2, "Мясо и птица", "ic_meat"),
-            ProductCategoryEntity(3, "Рыба и морепродукты", "ic_fish"),
-            ProductCategoryEntity(4, "Яйца", "ic_eggs"),
-            ProductCategoryEntity(5, "Овощи", "ic_vegetables"),
-            ProductCategoryEntity(6, "Фрукты и ягоды", "ic_fruits"),
-            ProductCategoryEntity(7, "Крупы и каши", "ic_grains"),
-            ProductCategoryEntity(8, "Хлеб и выпечка", "ic_bread"),
-            ProductCategoryEntity(9, "Макаронные изделия", "ic_pasta"),
-            ProductCategoryEntity(10, "Орехи и семена", "ic_nuts"),
-            ProductCategoryEntity(11, "Масла и жиры", "ic_oils"),
-            ProductCategoryEntity(12, "Сладости и десерты", "ic_sweets"),
-            ProductCategoryEntity(13, "Напитки", "ic_drinks"),
-            ProductCategoryEntity(14, "Соусы и приправы", "ic_sauces"),
-            ProductCategoryEntity(15, "Другое", "ic_other")
+            ProductCategoryEntity(1, "Молочные продукты"),
+            ProductCategoryEntity(2, "Мясо и птица"),
+            ProductCategoryEntity(3, "Рыба и морепродукты"),
+            ProductCategoryEntity(4, "Яйца"),
+            ProductCategoryEntity(5, "Овощи"),
+            ProductCategoryEntity(6, "Фрукты и ягоды"),
+            ProductCategoryEntity(7, "Крупы и каши"),
+            ProductCategoryEntity(8, "Хлеб и выпечка"),
+            ProductCategoryEntity(9, "Макаронные изделия"),
+            ProductCategoryEntity(10, "Орехи и семена"),
+            ProductCategoryEntity(11, "Масла и жиры"),
+            ProductCategoryEntity(12, "Сладости и десерты"),
+            ProductCategoryEntity(13, "Напитки"),
+            ProductCategoryEntity(14, "Соусы и приправы"),
+            ProductCategoryEntity(15, "Другое")
         )
     }
 

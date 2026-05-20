@@ -3,6 +3,8 @@ package com.example.myhealthydiet.data.local.room
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.myhealthydiet.data.local.room.converters.DatabaseConverters
 import com.example.myhealthydiet.data.local.room.dao.*
 import com.example.myhealthydiet.data.local.room.entities.*
@@ -17,7 +19,7 @@ import com.example.myhealthydiet.data.local.room.entities.*
         DishEntity::class,
         ConsumptionHistoryEntity::class
     ],
-    version = 2, // ← bumped: добавлен уникальный индекс в ConsumptionHistoryEntity
+    version = 3, // ← bumped: добавлен уникальный индекс в ConsumptionHistoryEntity
     exportSchema = false
 )
 @TypeConverters(DatabaseConverters::class)

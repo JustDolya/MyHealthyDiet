@@ -6,6 +6,5 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "product_categories")
 data class ProductCategoryEntity(
     @PrimaryKey val id: Int, // фиксированные ID (1-15)
-    val name: String,
-    val imagePath: String
+    val name: String
 )

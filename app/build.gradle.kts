@@ -50,7 +50,7 @@ android {
 }
 
 dependencies {
-    // Core Android - с зафиксированными версиями
+    // Core Android
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.activity:activity-compose:1.8.2")
@@ -69,7 +69,7 @@ dependencies {
     implementation(libs.androidx.adapters)
     implementation(libs.firebase.crashlytics.buildtools)
 
-    //JSON
+    // JSON
     implementation("com.google.code.gson:gson:2.10.1")
 
     // Room
@@ -78,12 +78,12 @@ dependencies {
     implementation("androidx.room:room-ktx:$roomVersion")
     ksp("androidx.room:room-compiler:$roomVersion")
 
-    // Hilt (Dependency Injection)
+    // Hilt
     val hiltVersion = "2.51"
     implementation("com.google.dagger:hilt-android:$hiltVersion")
     ksp("com.google.dagger:hilt-compiler:$hiltVersion")
 
-    //Firebase
+    // Firebase
     implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-firestore-ktx")
@@ -99,15 +99,32 @@ dependencies {
     implementation("androidx.hilt:hilt-work:1.2.0")
     ksp("androidx.hilt:hilt-compiler:1.2.0")
 
-    // Coil (загрузка изображений)
+    // Coil
     implementation("io.coil-kt:coil-compose:2.6.0")
 
     // Lifecycle
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
 
-    // Testing
+    // ── Тестирование ──────────────────────────────────────────────────────────
+
+    // JUnit4
     testImplementation("junit:junit:4.13.2")
+
+    // MockK — мокирование зависимостей в Kotlin
+    testImplementation("io.mockk:mockk:1.13.10")
+
+    // Coroutines Test — запуск suspend-функций и Flow в тестах
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+
+    // Turbine — удобное тестирование Flow (.test { })
+    testImplementation("app.cash.turbine:turbine:1.1.0")
+
+    // AndroidX Test (для Room in-memory в unit-тестах)
+    testImplementation("androidx.test:core:1.5.0")
+    testImplementation("androidx.arch.core:core-testing:2.2.0")
+
+    // Instrumented tests
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     androidTestImplementation(platform("androidx.compose:compose-bom:2024.02.00"))

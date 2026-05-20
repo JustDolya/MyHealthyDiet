@@ -188,7 +188,7 @@ fun DishDetailScreen(
                 dish.steps.split("\n").forEachIndexed { index, step ->
                     if (step.isNotBlank()) {
                         Text(
-                            text = "Шаг ${index + 1}: $step",
+                            text = step,
                             fontSize = 14.sp,
                             color = Black,
                             modifier = Modifier.padding(vertical = 3.dp),

@@ -279,8 +279,8 @@ private fun HistoryListItem(item: ConsumptionHistory) {
         Column(modifier = Modifier.weight(1f)) {
             Text(item.name, fontWeight = FontWeight.Medium, fontSize = 15.sp, color = Black)
             Text(
-                text = if (item.isDish) "$time · ${item.grams}% порции"
-                else "$time · ${item.grams} г",
+                text = if (item.isDish) "$time · ${item.grams} грамм"
+                else "$time · ${item.grams} грамм",
                 fontSize = 12.sp,
                 color = TextSecondary,
             )

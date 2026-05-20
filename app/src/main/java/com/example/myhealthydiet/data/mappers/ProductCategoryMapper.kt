@@ -5,22 +5,19 @@ import com.example.myhealthydiet.domain.models.ProductCategory
 
 data class ProductCategory(
     val id: Int,
-    val name: String,
-    val imagePath: String
+    val name: String
 )
 
 fun ProductCategoryEntity.toDomain(): ProductCategory {
     return ProductCategory(
         id = id,
-        name = name,
-        imagePath = imagePath
+        name = name
     )
 }
 
 fun ProductCategory.toEntity(): ProductCategoryEntity {
     return ProductCategoryEntity(
         id = id,
-        name = name,
-        imagePath = imagePath
+        name = name
     )
 }
